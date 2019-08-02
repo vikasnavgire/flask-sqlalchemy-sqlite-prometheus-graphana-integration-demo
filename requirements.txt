@@ -1,0 +1,3 @@
+flask-sqlalchemy
+Flask-Migrate
+prometheus_client

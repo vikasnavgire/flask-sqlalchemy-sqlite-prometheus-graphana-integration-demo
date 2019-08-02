@@ -1,0 +1,148 @@
+---------------------------------------------------------------------------------------------------------
+# Applications overview
+---------------------------------------------------------------------------------------------------------
+The application can be interfaced with via HTTP, its endpoints providing the following functionality:
+use "apiKey": "4ACFE3202A5FF5CF467898FC58AAB1D615029441" as headers in your requests
+This is local deployment details.
+Python : 3.6, Ubunut 16.04
+
+    ○ get a value (GET /keys/{id})
+      http://127.0.0.1:5000/keys/4
+
+    ○ get all keys and values (GET /keys)
+      http://127.0.0.1:5000/keys
+
+    ○ set a value (PUT /keys)
+      http://127.0.0.1:5000/keys
+      payload Body/raw value "test_value"
+
+    ○ check if a value exists (HEAD /keys/{id})
+      http://127.0.0.1:5000/keys/5
+
+    ○ delete a value (DELETE /keys/{id})
+      http://127.0.0.1:5000/keys/4
+
+    ○ delete all values (DELETE /keys)
+      http://127.0.0.1:5000/keys
+
+    ○ set an expiry time when adding a value (PUT /keys?expire_in=60)
+      http://127.0.0.1:5000/keys?expire_in=100
+
+    ○ support wildcard keys when getting all values (GET /keys?filter=wo$d)
+      http://127.0.0.1:5000/keys?filter=vik%
+
+The application logs stdout with use of python logger with format, used to forward to ELK(live monitoring purpose)
+
+Application Status code:
+    200 : success response
+    400 : Bad request
+    403 : Unauthorized user
+    404 : Not found key/url/method not found
+    500 : Internal server error(on interal failure)
+
+
+Sqlite3 DB data stored used in backend (since small application)
+
+Prometheus integration to monitor(/metrics endpoint) the applications
+
+Grafana integration for data Visualization solutions and beautiful graph monitoring
+
+Docker-compose : start application
+    docker-compose up -d
+    Note: make sure configuration related prometheus, grafana etc
+
+<snap>
+vikas@vikas-pc:~/workspace/Platform_service/native_instruments_sol$ docker-compose ps
+              Name                            Command               State           Ports
+--------------------------------------------------------------------------------------------------
+backend-engine                     /bin/sh -c python ./main.py      Up      0.0.0.0:5000->5000/tcp
+native_instruments_sol_grafana_1   /run.sh                          Up      0.0.0.0:3000->3000/tcp
+prometheus                         /bin/prometheus --config.f ...   Up      0.0.0.0:9090->9090/tcp
+vikas@vikas-pc:~/workspace/Platform_service/native_instruments_sol$
+<snap>
+
+prometheus URL:
+http://127.0.0.1:9090
+
+Graphana URL:
+http:/127.0.0.1:3000
+
+------------------------------------------------------------------------------------------
+## Build, Installations steps Individual images ##
+------------------------------------------------------------------------------------------
+Docker build and run:
+    docker build -t native_instruments_sol .
+    docker run -d -p 5000:5000 native_instruments_sol
+
+-----------------------------------------------------------------------------------------------------
+## Prometheus setup ##
+-----------------------------------------------------------------------------------------------------
+Docker run for prometheus:
+    docker run -d -p 9090:9090 --volume <full_path>/config/prometheus.yml:/etc/prometheus/prometheus.yml --network=host prom/prometheus
+
+Note: Please update prometheus config file accordingly (ip addr, or localhost)
+
+-----------------------------------------------------------------------------------------------------
+## Grafana setup ##
+-----------------------------------------------------------------------------------------------------
+default, Grafana will be listening on http://localhost:3000. The default login is admin/admin
+To create a Prometheus data source:
+1. Click on the grafana logo to open the sidebar menu.
+2. Click on "Data Sources" in the sidebar.
+3. Click on "Add New".
+4. Select "Prometheus" as the type.
+4. Set the appropriate Prometheus server URL (for example, http://localhost:9090/)
+5. Adjust other data source settings as desired (for example, turning the proxy access off).
+6. Click "Add" to save the new data source.
+
+Start exploring the graphs and live monitoring.
+
+---------------------------------------------------------------------------------------------------------
+## Application directory structure ##
+---------------------------------------------------------------------------------------------------------
+vikas@vikas-pc:~/workspace/Platform_service/native_instruments_sol$ tree
+.
+├── app.py
+├── config
+│   ├── __init__.py
+│   ├── prometheus
+│   └── prometheus.yml
+├── DATABASE.sqlite3
+├── docker-compose.yml
+├── Dockerfile
+├── helpers
+│   ├── __init__.py
+│   └── middleware.py
+├── __init__.py
+├── main.py
+├── manage.py
+├── README.md
+├── requirements.txt
+└── utils
+    ├── auth.py
+    ├── config.py
+    ├── constants.py
+    ├── errors.py
+    ├── __init__.py
+    └── log.py
+
+4 directories, 19 files
+vikas@vikas-pc:~/workspace/Platform_service/native_instruments_sol$
+
+---------------------------------------------------------------------------------------------------------
+## app features/advantage in SDLC
+---------------------------------------------------------------------------------------------------------
+1. Integrate with any cloud technology (GCP, AWS, etc)
+2. maintainable, reusable, reconfigurable (microservice)
+3. CICD easy setup using docker compose
+3. can be integrate with Kuberenetes
+4. reused open source code and tools
+5. easy DB migration, upgrade
+
+---------------------------------------------------------------------------------------------------------
+##  current limitations ##
+---------------------------------------------------------------------------------------------------------
+1. Optimised more in sense of scalability, performance (kubernetes solution)
+2. integrate with ELK (monitoring, alerting, pagerduety etc)
+3. instead of flask can be written in django(if more coplex in strucutre)
+4. better database (mysql etc)
